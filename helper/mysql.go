@@ -12,26 +12,26 @@ func DefaultDB() (*sqlx.DB, error) {
 	return ConnectDB("db")
 }
 
-func ConnectDB(cfg string) (*sqlx.DB, error) {
+func ConnectDB(name string) (*sqlx.DB, error) {
 	if len(connMap) == 0 {
 		connMap = make(map[string]*sqlx.DB)
 	}
 
-	if _, ok := connMap[cfg]; ok {
-		if err := connMap[cfg].Ping(); err == nil {
-			//DebugLog("mysql connect ping success:"+cfg, "")
-			return connMap[cfg], nil
+	if _, ok := connMap[name]; ok {
+		if err := connMap[name].Ping(); err == nil {
+			//DebugLog("mysql connect ping success:"+name, "")
+			return connMap[name], nil
 		}
-		//DebugLog("mysql connect ping failed:"+cfg, "")
+		//DebugLog("mysql connect ping failed:"+name, "")
 	}
 
-	cfgMap := config.Get(cfg).StringMap(map[string]string{})
+	cfgMap := config.Get(name).StringMap(map[string]string{})
 	conn, err := sqlx.Open("mysql", cfgMap["user"]+":"+cfgMap["password"]+"@tcp("+cfgMap["host"]+":"+cfgMap["port"]+")/"+cfgMap["database"])
 	if err != nil {
 		ErrorLog("open mysql failed:"+err.Error(), "")
 		return nil, err
 	}
-	//DebugLog("redis pool create:"+cfg, "")
-	connMap[cfg] = conn
+	//DebugLog("redis pool create:"+name, "")
+	connMap[name] = conn
 	return conn, nil
 }
