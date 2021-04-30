@@ -4,16 +4,16 @@
 package xyf_robot_srv
 
 import (
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
+	"fmt"
+	"github.com/golang/protobuf/proto"
+	"math"
 )
 
 import (
-	context "context"
-	api "github.com/micro/go-micro/v2/api"
-	client "github.com/micro/go-micro/v2/client"
-	server "github.com/micro/go-micro/v2/server"
+	"context"
+	"github.com/micro/go-micro/v2/api"
+	"github.com/micro/go-micro/v2/client"
+	"github.com/micro/go-micro/v2/server"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
