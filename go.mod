@@ -1,4 +1,4 @@
-module go-lib
+module github.com/yiqiang3344/go-lib
 
 go 1.13
 
