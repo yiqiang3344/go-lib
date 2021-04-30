@@ -12,7 +12,7 @@ import (
 	"runtime"
 )
 
-func NewJaegerTracer(serviceName string, addr string) (opentracing.Tracer, io.Closer, error) {
+func InitJaegerTracer(serviceName string, addr string) (opentracing.Tracer, io.Closer, error) {
 	cfg := jaegercfg.Configuration{
 		ServiceName: serviceName,
 		Sampler: &jaegercfg.SamplerConfig{
