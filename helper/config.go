@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 var Cfg config.Config
@@ -17,27 +18,41 @@ var Cfg config.Config
 var prefixs = []string{"cfg"}
 
 func InitCfg() {
-	err := config.Load(
+	local, err := config.NewConfig(
+		config.WithSource(file.NewSource(file.WithPath("config/common.yaml"))),
+		config.WithSource(file.NewSource(file.WithPath("config/"+os.Getenv("ENV")+".yaml"))),
+	)
+	if err != nil {
+		log.Fatalf("local log init failed:", err.Error())
+	}
+	//本地配置配置中心的地址信息
+	etcdAddress := GetCfg(local, "etcdCfgCenter.address").String("")
+	//多数据源，越下面优先级越高
+	err = config.Load(
 		etcd.NewSource(
-			etcd.WithAddress("127.0.0.1:2379"),
+			etcd.WithAddress(etcdAddress),
 			etcd.WithPrefix("/common/config"),
 			etcd.StripPrefix(true),
 		),
 		etcd.NewSource(
-			etcd.WithAddress("127.0.0.1:2379"),
-			etcd.WithPrefix("/xyf-robot-srv/config"),
+			etcd.WithAddress(etcdAddress),
+			etcd.WithPrefix("/"+GetCfg(local, "project").String("")+"/config"),
 			etcd.StripPrefix(true),
 		),
+		file.NewSource(file.WithPath("config/common.yaml")),
 		file.NewSource(file.WithPath("config/"+os.Getenv("ENV")+".yaml")),
 	)
+	_ = local.Close()
 	if err != nil {
 		log.Fatalf("log init failed:", err.Error())
 	}
 
+	//热更新配置
 	go hotUpdate()
 }
 
 func hotUpdate() {
+	time.Sleep(5 * time.Second) //暂停5秒之后再执行，等日志初始化完毕，否则可能会写入日志失败
 	for {
 		//启动热更新
 		w, err := config.Watch("cfg")
@@ -66,11 +81,15 @@ func hotUpdate() {
 }
 
 func GetCfgString(route string) string {
-	return getCfg(route).String("")
+	return GetCfg(config.DefaultConfig, route).String("")
 }
 
 func GetCfgInt(route string) int {
-	return getCfg(route).Int(0)
+	return GetCfg(config.DefaultConfig, route).Int(0)
+}
+
+func GetCfgStringMap(route string) map[string]string {
+	return GetCfg(config.DefaultConfig, route).StringMap(map[string]string{})
 }
 
 func parseRoute(route string) []string {
@@ -81,7 +100,7 @@ func parseRoute(route string) []string {
 	return arr
 }
 
-func getCfg(route string) reader.Value {
+func GetCfg(cfg config.Config, route string) reader.Value {
 	arr := parseRoute(route)
-	return config.Get(arr...)
+	return cfg.Get(arr...)
 }

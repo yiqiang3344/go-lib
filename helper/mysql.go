@@ -3,7 +3,6 @@ package helper
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/micro/go-micro/v2/config"
 )
 
 var connMap map[string]*sqlx.DB
@@ -25,7 +24,7 @@ func ConnectDB(name string) (*sqlx.DB, error) {
 		//DebugLog("mysql connect ping failed:"+name, "")
 	}
 
-	cfgMap := config.Get(name).StringMap(map[string]string{})
+	cfgMap := GetCfgStringMap(name)
 	conn, err := sqlx.Open("mysql", cfgMap["user"]+":"+cfgMap["password"]+"@tcp("+cfgMap["host"]+":"+cfgMap["port"]+")/"+cfgMap["database"])
 	if err != nil {
 		ErrorLog("open mysql failed:"+err.Error(), "")

@@ -12,8 +12,8 @@ import (
 func CheckFreq(_type string, title string, limitFreq int) (bool, string) {
 	redisInstance := DefaultRedis()
 	defer redisInstance.Close()
-	freqKey := "xyf-robot-srv:frequency:" + _type + ":" + fmt.Sprintf("%x", md5.Sum([]byte(title)))
-	historyKey := "xyf-robot-srv:history:" + _type + ":" + fmt.Sprintf("%x", md5.Sum([]byte(title)))
+	freqKey := GenRedisKey("frequency:" + _type + ":" + fmt.Sprintf("%x", md5.Sum([]byte(title))))
+	historyKey := GenRedisKey("history:" + _type + ":" + fmt.Sprintf("%x", md5.Sum([]byte(title))))
 	r, err := redis.Bool(redisInstance.Do("setnx", freqKey, 1))
 	if err != nil {
 		ErrorLog("setnx "+freqKey+" error:"+err.Error(), "")

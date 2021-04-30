@@ -2,8 +2,8 @@ package helper
 
 import (
 	"github.com/garyburd/redigo/redis"
-	"github.com/micro/go-micro/v2/config"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -13,6 +13,10 @@ var genPoolOnceMap map[string]*sync.Once
 
 func DefaultRedis() redis.Conn {
 	return InitRedisPool("redis").Get()
+}
+
+func GenRedisKey(args ...string) string {
+	return GetCfgString("project") + ":" + strings.Join(args, ":")
 }
 
 func InitRedisPool(name string) *redis.Pool {
@@ -32,7 +36,7 @@ func InitRedisPool(name string) *redis.Pool {
 			IdleTimeout: 300 * time.Second,
 			MaxActive:   20, //最大数
 			Dial: func() (redis.Conn, error) {
-				cfgMap := config.Get(name).StringMap(map[string]string{})
+				cfgMap := GetCfgStringMap(name)
 				//从mysql查询biz_type配置
 				database, _ := strconv.Atoi(cfgMap["database"])
 				c, err := redis.Dial(

@@ -101,7 +101,7 @@ func InitLogger() {
 	// 开启文件及行号
 	//development := zap.Development()
 	// 设置初始化字段
-	filed := zap.Fields(zap.String("project", "xyf-robot-srv"))
+	filed := zap.Fields(zap.String("project", GetCfgString("project")))
 	// 构造日志
 	//Logger = zap.New(core, caller, development, filed)
 	Logger = zap.New(core, filed)
