@@ -15,14 +15,14 @@ import (
 // 发送POST请求
 // url：         请求地址
 // data：        POST请求提交的数据
-func PostJson(ctx context.Context, url string, data interface{}) (bool, int, string) {
+func PostJson(ctx context.Context, url string, data interface{}, timeout time.Duration) (bool, int, string) {
 	resp, err := httpRequest(
 		ctx,
 		"POST",
 		url,
 		data,
 		"application/json",
-		5*time.Second,
+		timeout,
 	)
 	var statusCode int
 	result := ""
