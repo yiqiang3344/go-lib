@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package="./proto/robot-srv";
+
+service RobotSrv {
+	rpc SendMsg(Request) returns (Response) {}
+	rpc Test(TestRequest) returns (Response) {}
+}
+
+message Request {
+	string biz_type = 1;
+	string msg_type = 2;
+	string title = 3;
+	string content = 4;
+	repeated string at_mobiles = 5;
+	bool at_all = 6;
+}
+
+message TestRequest {
+	string test = 1;
+}
+
+message Response {
+	string status = 1;
+	string msg = 2;
+}
