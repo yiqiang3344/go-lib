@@ -1,4 +1,4 @@
-package helper
+package cLog
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/micro/go-micro/v2/server"
 	"github.com/opentracing/opentracing-go"
+	cTime "github.com/yiqiang3344/go-lib/utils/time"
+	"github.com/yiqiang3344/go-lib/utils/uuid"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -30,7 +32,7 @@ type SrvResponse struct {
 }
 
 func (u *SrvRequest) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	enc.AddString("time", MilliDatetimeByTime(u.Time))
+	enc.AddString("time", cTime.MilliDatetimeByTime(u.Time))
 	enc.AddString("url", u.Url)
 	headJson, _ := json.Marshal(u.Header)
 	enc.AddString("header", string(headJson))
@@ -40,7 +42,7 @@ func (u *SrvRequest) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 }
 
 func (u *SrvResponse) MarshalLogObject(enc zapcore.ObjectEncoder) error {
-	enc.AddString("time", MilliDatetimeByTime(u.Time))
+	enc.AddString("time", cTime.MilliDatetimeByTime(u.Time))
 	enc.AddInt("status_code", u.StatusCode)
 	enc.AddString("data", u.Data)
 	return nil
@@ -52,17 +54,17 @@ var RequestID string
 func initRequestId(ctx context.Context) {
 	parent := opentracing.SpanFromContext(ctx)
 	if parent == nil {
-		RequestID = GenUuId()
+		RequestID = uuid.GenUuId()
 	} else {
 		RequestID = strings.Split(fmt.Sprint(parent.Context()), ":")[0]
 	}
 }
 
 func encodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(MilliDatetimeByTime(t))
+	enc.AppendString(cTime.MilliDatetimeByTime(t))
 }
 
-func InitLogger() {
+func InitLogger(project string) {
 	hook := lumberjack.Logger{
 		Filename:   "log/app.log", // 日志文件路径
 		MaxSize:    512,           // 每个日志文件保存的最大尺寸 单位：M
@@ -101,7 +103,7 @@ func InitLogger() {
 	// 开启文件及行号
 	//development := zap.Development()
 	// 设置初始化字段
-	filed := zap.Fields(zap.String("project", GetCfgString("project")))
+	filed := zap.Fields(zap.String("project", project))
 	// 构造日志
 	//Logger = zap.New(core, caller, development, filed)
 	Logger = zap.New(core, filed)

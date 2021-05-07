@@ -1,9 +1,11 @@
-package helper
+package cNet
 
 import (
 	"bytes"
 	"encoding/json"
 	"github.com/opentracing/opentracing-go"
+	cLog "github.com/yiqiang3344/go-lib/utils/log"
+	"github.com/yiqiang3344/go-lib/utils/trace"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
@@ -41,7 +43,7 @@ func PostJson(ctx context.Context, url string, data interface{}, timeout time.Du
 }
 
 func httpRequest(ctx context.Context, method string, url string, data interface{}, contentType string, timeout time.Duration) (*http.Response, error) {
-	span := NewInnerSpan(RunFuncName(), ctx)
+	span := trace.NewInnerSpan(trace.RunFuncName(), ctx)
 	if span != nil {
 		defer span.Finish()
 	}
@@ -58,7 +60,7 @@ func httpRequest(ctx context.Context, method string, url string, data interface{
 			bytes.NewBuffer(jsonStr),
 		)
 		if err != nil {
-			AddSpanError(span, err)
+			trace.AddSpanError(span, err)
 			return nil, err
 		}
 		req.Header.Set("Content-Type", contentType)
@@ -69,7 +71,7 @@ func httpRequest(ctx context.Context, method string, url string, data interface{
 			nil,
 		)
 		if err != nil {
-			AddSpanError(span, err)
+			trace.AddSpanError(span, err)
 			return nil, err
 		}
 	}
@@ -79,13 +81,13 @@ func httpRequest(ctx context.Context, method string, url string, data interface{
 			opentracing.HTTPHeadersCarrier(req.Header),
 		)
 		if err != nil {
-			FatalLog("Could not inject span context into header:"+err.Error(), "")
+			cLog.FatalLog("Could not inject span context into header:"+err.Error(), "")
 		}
 	}
 	startTime := time.Now()
 	res, err = c.Do(req)
 	if err != nil {
-		AddSpanError(span, err)
+		trace.AddSpanError(span, err)
 		addErrorLog(startTime, time.Now(), req, data, err)
 		return nil, err
 	}
@@ -95,18 +97,18 @@ func httpRequest(ctx context.Context, method string, url string, data interface{
 }
 
 func addLog(startTime time.Time, endTime time.Time, url string, header interface{}, data interface{}, statusCode int, result string) {
-	request := &SrvRequest{
+	request := &cLog.SrvRequest{
 		Time:   startTime,
 		Url:    url,
 		Header: header,
 		Body:   data,
 	}
-	reponse := &SrvResponse{
+	reponse := &cLog.SrvResponse{
 		Time:       endTime,
 		StatusCode: statusCode,
 		Data:       string(result),
 	}
-	WebClientLog(
+	cLog.WebClientLog(
 		zap.Object("request", request),
 		zap.Object("response", reponse),
 		zap.Float64("response_time", float64(endTime.Sub(startTime).Microseconds())/1e6),

@@ -1,4 +1,4 @@
-package helper
+package config
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"github.com/micro/go-micro/v2/config/reader"
 	"github.com/micro/go-micro/v2/config/source/etcd"
 	"github.com/micro/go-micro/v2/config/source/file"
+	cLog "github.com/yiqiang3344/go-lib/utils/log"
+	"github.com/yiqiang3344/go-lib/utils/trace"
 	"go.uber.org/zap"
 	"log"
 	"os"
@@ -57,23 +59,23 @@ func hotUpdate() {
 		//启动热更新
 		w, err := config.Watch("cfg")
 		if err != nil {
-			ErrorLog("配置热更新失败:"+err.Error(), RunFuncName())
+			cLog.ErrorLog("配置热更新失败:"+err.Error(), trace.RunFuncName())
 			return
 		}
 		v, err := w.Next()
 		if err != nil {
-			ErrorLog("配置热更新下一个失败:"+err.Error(), RunFuncName())
+			cLog.ErrorLog("配置热更新下一个失败:"+err.Error(), trace.RunFuncName())
 			return
 		}
 		before := fmt.Sprint(config.Get(prefixs...).StringMap(map[string]string{}))
 		err = config.Sync()
 		if err != nil {
-			ErrorLog("配置热更新同步失败:"+err.Error(), RunFuncName())
+			cLog.ErrorLog("配置热更新同步失败:"+err.Error(), trace.RunFuncName())
 			return
 		}
-		DebugLog(
+		cLog.DebugLog(
 			"配置热更新成功",
-			RunFuncName(),
+			trace.RunFuncName(),
 			zap.String("beforeCfgData", before),
 			zap.String("afterCfgData", fmt.Sprint(v.StringMap(map[string]string{}))),
 		)

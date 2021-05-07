@@ -1,8 +1,10 @@
-package helper
+package cMysql
 
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/yiqiang3344/go-lib/utils/config"
+	cLog "github.com/yiqiang3344/go-lib/utils/log"
 )
 
 var connMap map[string]*sqlx.DB
@@ -24,10 +26,10 @@ func ConnectDB(name string) (*sqlx.DB, error) {
 		//DebugLog("mysql connect ping failed:"+name, "")
 	}
 
-	cfgMap := GetCfgStringMap(name)
+	cfgMap := config.GetCfgStringMap(name)
 	conn, err := sqlx.Open("mysql", cfgMap["user"]+":"+cfgMap["password"]+"@tcp("+cfgMap["host"]+":"+cfgMap["port"]+")/"+cfgMap["database"])
 	if err != nil {
-		ErrorLog("open mysql failed:"+err.Error(), "")
+		cLog.ErrorLog("open mysql failed:"+err.Error(), "")
 		return nil, err
 	}
 	//DebugLog("redis pool create:"+name, "")

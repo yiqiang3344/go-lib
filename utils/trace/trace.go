@@ -1,4 +1,4 @@
-package helper
+package trace
 
 import (
 	"context"
@@ -12,12 +12,12 @@ import (
 	"runtime"
 )
 
-func InitJaegerTracer(serviceName string, addr string) (opentracing.Tracer, io.Closer, error) {
+func InitJaegerTracer(serviceName string, addr string, samplerType string, samplerParam float64) (opentracing.Tracer, io.Closer, error) {
 	cfg := jaegercfg.Configuration{
 		ServiceName: serviceName,
 		Sampler: &jaegercfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
+			Type:  samplerType,
+			Param: samplerParam,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans: true,

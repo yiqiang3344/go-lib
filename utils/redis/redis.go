@@ -1,7 +1,8 @@
-package helper
+package cRedis
 
 import (
 	"github.com/garyburd/redigo/redis"
+	"github.com/yiqiang3344/go-lib/utils/config"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,7 +17,7 @@ func DefaultRedis() redis.Conn {
 }
 
 func GenRedisKey(args ...string) string {
-	return GetCfgString("project") + ":" + strings.Join(args, ":")
+	return config.GetCfgString("project") + ":" + strings.Join(args, ":")
 }
 
 func InitRedisPool(name string) *redis.Pool {
@@ -36,7 +37,7 @@ func InitRedisPool(name string) *redis.Pool {
 			IdleTimeout: 300 * time.Second,
 			MaxActive:   20, //最大数
 			Dial: func() (redis.Conn, error) {
-				cfgMap := GetCfgStringMap(name)
+				cfgMap := config.GetCfgStringMap(name)
 				//从mysql查询biz_type配置
 				database, _ := strconv.Atoi(cfgMap["database"])
 				c, err := redis.Dial(

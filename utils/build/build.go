@@ -1,7 +1,9 @@
-package helper
+package build
 
 import (
 	"github.com/micro/go-micro/v2"
+	"github.com/yiqiang3344/go-lib/utils/config"
+	cNet "github.com/yiqiang3344/go-lib/utils/net"
 	"log"
 	"os"
 	"os/exec"
@@ -13,7 +15,7 @@ import (
 )
 
 func CheckSignReload(project string, service micro.Service) {
-	ip, _ := GetLocalIP()
+	ip, _ := cNet.GetLocalIP()
 	//监听USR1信号
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGUSR1)
@@ -35,7 +37,7 @@ func CheckSignReload(project string, service micro.Service) {
 			//注销服务
 			shell = "micro --registry=etcd " +
 				"--registry_address=" +
-				GetCfgString("etcd.address") +
+				config.GetCfgString("etcd.address") +
 				" deregister service '{" +
 				"\"name\": \"" + service.Server().Options().Name + "\"," +
 				"\"version\": \"" + service.Server().Options().Version + "\"," +

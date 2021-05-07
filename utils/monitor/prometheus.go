@@ -1,8 +1,10 @@
-package helper
+package monitor
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/yiqiang3344/go-lib/utils/config"
+	cLog "github.com/yiqiang3344/go-lib/utils/log"
 	"net/http"
 )
 
@@ -22,9 +24,9 @@ func InitPrometheus() *prometheus.HistogramVec {
 		httpReqsHistory,
 	)
 	go func() {
-		err := http.ListenAndServe(GetCfgString("prometheus.address"), nil)
+		err := http.ListenAndServe(config.GetCfgString("prometheus.address"), nil)
 		if err != nil {
-			FatalLog(err.Error(), "")
+			cLog.FatalLog(err.Error(), "")
 		}
 	}()
 	return httpReqsHistory
