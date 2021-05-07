@@ -21,8 +21,8 @@ var prefixs = []string{"cfg"}
 
 func InitCfg() {
 	local, err := config.NewConfig(
-		config.WithSource(file.NewSource(file.WithPath("config/common.yaml"))),
-		config.WithSource(file.NewSource(file.WithPath("config/"+os.Getenv("ENV")+".yaml"))),
+		config.WithSource(file.NewSource(file.WithPath("configs/common.yaml"))),
+		config.WithSource(file.NewSource(file.WithPath("configs/"+os.Getenv("ENV")+".yaml"))),
 	)
 	if err != nil {
 		log.Fatalf("local log init failed:", err.Error())
@@ -41,8 +41,8 @@ func InitCfg() {
 			etcd.WithPrefix("/"+GetCfg(local, "project").String("")+"/config"),
 			etcd.StripPrefix(true),
 		),
-		file.NewSource(file.WithPath("config/common.yaml")),
-		file.NewSource(file.WithPath("config/"+os.Getenv("ENV")+".yaml")),
+		file.NewSource(file.WithPath("configs/common.yaml")),
+		file.NewSource(file.WithPath("configs/"+os.Getenv("ENV")+".yaml")),
 	)
 	_ = local.Close()
 	if err != nil {
