@@ -64,7 +64,7 @@ func encodeTime(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(cTime.MilliDatetimeByTime(t))
 }
 
-func InitLogger(project string) {
+func InitLogger(project string, showToConsole bool) {
 	hook := lumberjack.Logger{
 		Filename:   "log/app.log", // 日志文件路径
 		MaxSize:    512,           // 每个日志文件保存的最大尺寸 单位：M
@@ -92,10 +92,15 @@ func InitLogger(project string) {
 	atomicLevel := zap.NewAtomicLevel()
 	atomicLevel.SetLevel(zap.DebugLevel)
 
+	writeArr := []zapcore.WriteSyncer{zapcore.AddSync(&hook)}
+	if showToConsole {
+		writeArr = append(writeArr, zapcore.AddSync(os.Stdout))
+	}
+
 	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig),                                           // 编码器配置
-		zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(&hook)), // 打印到控制台和文件
-		atomicLevel, // 日志级别
+		zapcore.NewJSONEncoder(encoderConfig),    // 编码器配置
+		zapcore.NewMultiWriteSyncer(writeArr...), // 打印到控制台和文件
+		atomicLevel,                              // 日志级别
 	)
 
 	// 开启开发模式，堆栈跟踪

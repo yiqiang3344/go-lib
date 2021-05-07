@@ -6,11 +6,11 @@ import (
 	"github.com/micro/go-micro/v2/config/reader"
 	"github.com/micro/go-micro/v2/config/source/etcd"
 	"github.com/micro/go-micro/v2/config/source/file"
+	"github.com/yiqiang3344/go-lib/utils/env"
 	cLog "github.com/yiqiang3344/go-lib/utils/log"
 	"github.com/yiqiang3344/go-lib/utils/trace"
 	"go.uber.org/zap"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
@@ -22,7 +22,7 @@ var prefixs = []string{"cfg"}
 func InitCfg() {
 	local, err := config.NewConfig(
 		config.WithSource(file.NewSource(file.WithPath("configs/common.yaml"))),
-		config.WithSource(file.NewSource(file.WithPath("configs/"+os.Getenv("ENV")+".yaml"))),
+		config.WithSource(file.NewSource(file.WithPath("configs/"+env.GetEnv()+".yaml"))),
 	)
 	if err != nil {
 		log.Fatalf("local log init failed:", err.Error())
@@ -42,7 +42,7 @@ func InitCfg() {
 			etcd.StripPrefix(true),
 		),
 		file.NewSource(file.WithPath("configs/common.yaml")),
-		file.NewSource(file.WithPath("configs/"+os.Getenv("ENV")+".yaml")),
+		file.NewSource(file.WithPath("configs/"+env.GetEnv()+".yaml")),
 	)
 	_ = local.Close()
 	if err != nil {
@@ -86,8 +86,12 @@ func GetCfgString(route string) string {
 	return GetCfg(config.DefaultConfig, route).String("")
 }
 
-func GetCfgInt(route string) int {
-	return GetCfg(config.DefaultConfig, route).Int(0)
+func GetCfgInt(route string, defaultValue int) int {
+	return GetCfg(config.DefaultConfig, route).Int(defaultValue)
+}
+
+func GetCfgBool(route string, defaultValue bool) bool {
+	return GetCfg(config.DefaultConfig, route).Bool(defaultValue)
 }
 
 func GetCfgStringMap(route string) map[string]string {
